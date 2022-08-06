@@ -1,0 +1,28 @@
+version: "3.2"
+services:
+  redis:
+    image: redis:alpine
+  proxy_server:
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      - "REDIS_HOST=redis"
+      - "REDIS_PORT=6379"
+      - "SECRET=a9ddbcaba8c0ac1a0a812dc0c2f08514b23f2db0a68343cb8199ebb38a6d91e4ebfb378e22ad39c2d01 d0b4ec9c34aa91056862ddace3fbbd6852ee60c36acbf"
+    ports:
+      - "9098:${HTTP_PORT}"
+    depends_on:
+      - redis
+    restart: always
+  test:
+    build:
+      context: .
+    command: ["pytest", "tests.py"]
+    env_file:
+      - .env
+    environment:
+      - "PROXY_HOST=proxy_server"
+    depends_on:
+      - proxy_server
